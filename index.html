@@ -10,166 +10,144 @@
 html,body{margin:0;padding:0}
 body{
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",Arial,sans-serif;
-  background:#0f172a;color:#f8fafc;min-height:100vh;padding:10px;
+  background:#0f172a;color:#f8fafc;min-height:100vh;padding:8px;
 }
 .app{max-width:980px;margin:0 auto}
-.header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:4px 0 10px}
-h1{font-size:24px;margin:0;font-weight:950}
-.badge{background:#022c22;color:#86efac;border:1px solid #166534;border-radius:999px;padding:6px 12px;font-size:14px;font-weight:900}
-.panel{background:#111827;border:1px solid #334155;border-radius:18px;padding:12px;margin-bottom:10px;box-shadow:0 8px 18px rgba(0,0,0,.2)}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-label{display:block;font-size:15px;font-weight:900;color:#cbd5e1;margin-bottom:5px}
-input,select{
-  width:100%;font-size:26px;padding:9px 10px;border-radius:13px;
-  border:2px solid #475569;background:#020617;color:#fff;outline:none;
-}
-input:focus,select:focus{border-color:#38bdf8}
-button{height:48px;border:0;border-radius:13px;background:#334155;color:#fff;font-size:18px;font-weight:950;width:100%}
-.title{font-size:19px;font-weight:950;color:#7dd3fc;margin:0 0 10px}
-.resultGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.card{background:#0b1220;border:1px solid #334155;border-radius:16px;padding:12px;min-height:98px}
-.card .k{font-size:14px;color:#cbd5e1;font-weight:900;margin-bottom:8px}
-.card .v{font-size:30px;font-weight:950;color:#f8fafc}
-.card .unit{font-size:18px;color:#94a3b8;margin-left:4px}
-.good{color:#86efac!important}.warn{color:#fde68a!important}.bad{color:#fecaca!important}
-.summary{font-size:17px;line-height:1.65;color:#e2e8f0}
-.summary b{color:#7dd3fc}
-.note{font-size:14px;color:#cbd5e1;line-height:1.5;margin-top:6px}
-.hidden{display:none!important}
-@media(max-width:760px){
-  body{padding:8px;padding-top:18px}
-  h1{font-size:22px}
-  .badge{font-size:12px;padding:5px 9px}
-  .panel{padding:10px;margin-bottom:9px}
-  .grid{grid-template-columns:1fr 1fr;gap:8px}
-  .full{grid-column:1/3}
-  input,select{font-size:24px;padding:8px 9px}
-  .resultGrid{grid-template-columns:1fr 1fr;gap:8px}
-  .card{padding:10px;min-height:88px}
-  .card .v{font-size:25px}
-  .summary{font-size:15px}
-}
-@media(max-width:420px){
-  .grid{gap:7px}
-  input,select{font-size:22px}
-  .resultGrid{grid-template-columns:1fr}
-}
+.header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:2px 0 8px}
+h1{font-size:22px;margin:0;font-weight:950}
+.badge{background:#022c22;color:#86efac;border:1px solid #166534;border-radius:999px;padding:5px 10px;font-size:13px;font-weight:900}
+.panel{background:#111827;border:1px solid #334155;border-radius:16px;padding:10px;margin-bottom:8px;box-shadow:0 8px 18px rgba(0,0,0,.2)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+label{display:block;font-size:15px;font-weight:900;color:#cbd5e1;margin-bottom:4px}
+input{width:100%;font-size:25px;padding:9px 10px;border-radius:12px;border:2px solid #475569;background:#020617;color:#fff;outline:none}
+input:focus{border-color:#38bdf8}
+.diaBtns{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end}
+.diaBtn,button{height:50px;border:0;border-radius:12px;background:#334155;color:#fff;font-size:19px;font-weight:950}
+.diaBtn.active{background:#0ea5e9;color:#00111d}
+button{min-width:86px;background:#475569}
+.main{display:grid;grid-template-columns:1.05fr .95fr;gap:8px}
+.wellWrap{height:470px;position:relative;background:#020617;border:1px solid #334155;border-radius:16px;overflow:hidden;padding:14px}
+.wellTitle{font-size:16px;font-weight:950;color:#7dd3fc;margin-bottom:8px}
+.wellArea{position:absolute;left:34px;right:34px;top:50px;bottom:20px}
+.wellLine{position:absolute;left:48%;top:0;bottom:0;width:36px;transform:translateX(-50%);border:3px solid #64748b;border-top:4px solid #e2e8f0;border-bottom:4px solid #e2e8f0;border-radius:12px;background:#08111f;overflow:hidden}
+.water{position:absolute;left:0;right:0;bottom:0;background:rgba(56,189,248,.22);border-top:3px solid #38bdf8}
+.screen{position:absolute;left:0;right:0;background:repeating-linear-gradient(0deg,#fbbf24 0,#fbbf24 5px,#78350f 5px,#78350f 10px);opacity:.9}
+.sample{position:absolute;left:-8px;right:-8px;height:4px;background:#fb7185;border-radius:99px;box-shadow:0 0 8px #fb7185}
+.markLine{position:absolute;left:52%;right:0;border-top:2px dashed #64748b}
+.markLabel{position:absolute;left:58%;transform:translateY(-50%);font-size:13px;font-weight:950;color:#e2e8f0;background:#020617;padding:2px 5px;border-radius:6px;white-space:nowrap}
+.markLabel.waterLbl{color:#7dd3fc}.markLabel.screenLbl{color:#fde68a}.markLabel.sampleLbl{color:#fb7185}.markLabel.bottomLbl{color:#cbd5e1}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.card{background:#0b1220;border:1px solid #334155;border-radius:14px;padding:10px;min-height:78px}
+.card .t{font-size:13px;font-weight:900;color:#cbd5e1;margin-bottom:5px}
+.card .v{font-size:24px;font-weight:950;color:#f8fafc;text-align:right}.card.big .v{font-size:28px;color:#86efac}
+.purge{display:grid;gap:7px}.purgeRow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;background:#020617;border:1px solid #334155;border-radius:12px;padding:8px}.purgeRow .name{font-size:15px;font-weight:950;color:#e2e8f0}.purgeRow .val{font-size:22px;font-weight:950;color:#f8fafc}.purgeRow.total .val{color:#86efac}.warn{font-size:13px;color:#fecaca;font-weight:850;line-height:1.35;margin-top:7px;min-height:18px}.note{font-size:13px;color:#cbd5e1;line-height:1.4;margin-top:6px}
+@media(max-width:760px){body{padding:6px}.header{margin-bottom:6px}h1{font-size:20px}.panel{padding:8px}.grid{gap:6px}.main{grid-template-columns:1fr}.wellWrap{height:360px}.cards{grid-template-columns:1fr 1fr;gap:6px}input{font-size:22px;padding:8px}.diaBtn,button{height:46px;font-size:18px}.card{padding:8px}.card .v{font-size:22px}.card.big .v{font-size:25px}.purgeRow{padding:7px}.purgeRow .val{font-size:20px}.markLabel{font-size:12px;left:57%}}
+@media(max-width:420px){.grid{grid-template-columns:1fr 1fr}.wellWrap{height:345px}.wellArea{left:20px;right:14px}.markLabel{font-size:11px}.cards{grid-template-columns:1fr 1fr}.card .v{font-size:20px}.card.big .v{font-size:23px}}
 </style>
 </head>
 <body>
 <main class="app">
-  <div class="header">
-    <h1>地下水採樣助手 V1</h1>
-    <div class="badge">試用版</div>
-  </div>
+  <div class="header"><h1>地下水採樣助手 V1</h1><div class="badge">一頁式</div></div>
 
   <section class="panel">
-    <div class="title">基本資料</div>
+    <div class="diaBtns">
+      <button class="diaBtn active" id="dia2" type="button">2 吋</button>
+      <button class="diaBtn" id="dia4" type="button">4 吋</button>
+      <button id="clearBtn" type="button">清除</button>
+    </div>
+    <div class="note">井水體積規則：2 吋＝水柱高度 × 2；4 吋＝水柱高度 × 8.1</div>
+  </section>
+
+  <section class="panel">
     <div class="grid">
-      <div>
-        <label for="wellId">井號</label>
-        <input id="wellId" type="text" placeholder="MW-01">
-      </div>
-      <div>
-        <label for="diameterPreset">井徑</label>
-        <select id="diameterPreset">
-          <option value="5.08">2 吋（5.08 cm）</option>
-          <option value="10.16">4 吋（10.16 cm）</option>
-          <option value="15.24">6 吋（15.24 cm）</option>
-          <option value="20.32">8 吋（20.32 cm）</option>
-          <option value="custom">自訂 cm</option>
-        </select>
-      </div>
-      <div id="customDiaWrap" class="hidden">
-        <label for="diameterCm">自訂井徑 cm</label>
-        <input id="diameterCm" type="number" inputmode="decimal" min="0" step="0.1" placeholder="5.08">
-      </div>
-      <div>
-        <label for="wellDepth">井深 m</label>
-        <input id="wellDepth" type="number" inputmode="decimal" min="0" step="0.01" placeholder="30.0">
-      </div>
-      <div>
-        <label for="waterLevel">水位深度 m</label>
-        <input id="waterLevel" type="number" inputmode="decimal" min="0" step="0.01" placeholder="12.0">
-      </div>
-      <div>
-        <label for="screenTop">井篩上緣 m</label>
-        <input id="screenTop" type="number" inputmode="decimal" min="0" step="0.01" placeholder="18.0">
-      </div>
-      <div>
-        <label for="screenBottom">井篩下緣 m</label>
-        <input id="screenBottom" type="number" inputmode="decimal" min="0" step="0.01" placeholder="28.0">
-      </div>
-      <div class="full">
-        <button id="clearBtn" type="button">清除</button>
-      </div>
+      <div><label for="wellDepth">井深 m</label><input id="wellDepth" type="number" inputmode="decimal" min="0" step="0.1" placeholder="30.0"></div>
+      <div><label for="waterLevel">水位深度 m</label><input id="waterLevel" type="number" inputmode="decimal" min="0" step="0.1" placeholder="12.5"></div>
+      <div><label for="screenTop">井篩上緣 m</label><input id="screenTop" type="number" inputmode="decimal" min="0" step="0.1" placeholder="18.0"></div>
+      <div><label for="screenBottom">井篩下緣 m</label><input id="screenBottom" type="number" inputmode="decimal" min="0" step="0.1" placeholder="28.0"></div>
     </div>
+    <div class="warn" id="warn"></div>
   </section>
 
-  <section class="panel">
-    <div class="title">自動計算</div>
-    <div class="resultGrid">
-      <div class="card"><div class="k">水柱高度</div><div class="v" id="waterColumn">— <span class="unit">m</span></div></div>
-      <div class="card"><div class="k">井水體積</div><div class="v" id="wellVolume">— <span class="unit">L</span></div></div>
-      <div class="card"><div class="k">0.5 倍洗井體積</div><div class="v" id="vol05">— <span class="unit">L</span></div></div>
-      <div class="card"><div class="k">2 倍洗井體積</div><div class="v" id="vol2">— <span class="unit">L</span></div></div>
-      <div class="card"><div class="k">3 倍洗井體積</div><div class="v" id="vol3">— <span class="unit">L</span></div></div>
-      <div class="card"><div class="k">井篩中點</div><div class="v" id="screenMid">— <span class="unit">m</span></div></div>
+  <section class="main">
+    <div class="wellWrap">
+      <div class="wellTitle">井身示意圖</div>
+      <div class="wellArea">
+        <div class="wellLine">
+          <div class="water" id="waterBox"></div>
+          <div class="screen" id="screenBox"></div>
+          <div class="sample" id="sampleLine"></div>
+        </div>
+        <div class="markLine" id="topMark" style="top:0%"></div><div class="markLabel" id="topLbl" style="top:0%">井口 0 m</div>
+        <div class="markLine" id="waterMark"></div><div class="markLabel waterLbl" id="waterLbl">水位 —</div>
+        <div class="markLine" id="screenTopMark"></div><div class="markLabel screenLbl" id="screenTopLbl">井篩上緣 —</div>
+        <div class="markLine" id="screenBottomMark"></div><div class="markLabel screenLbl" id="screenBottomLbl">井篩下緣 —</div>
+        <div class="markLine" id="sampleMark"></div><div class="markLabel sampleLbl" id="sampleLbl">採樣深度 —</div>
+        <div class="markLine" id="bottomMark" style="top:100%"></div><div class="markLabel bottomLbl" id="bottomLbl" style="top:100%">井底 —</div>
+      </div>
     </div>
-  </section>
 
-  <section class="panel">
-    <div class="title">採樣深度建議</div>
-    <div class="summary" id="summary">輸入井深、水位與井篩位置後，自動計算。</div>
-    <div class="note" id="note"></div>
+    <div class="panel" style="margin-bottom:0">
+      <div class="cards">
+        <div class="card"><div class="t">水柱高度</div><div class="v" id="waterColumn">—</div></div>
+        <div class="card"><div class="t">井篩中點</div><div class="v" id="screenMid">—</div></div>
+        <div class="card"><div class="t">井篩長度</div><div class="v" id="screenLen">—</div></div>
+        <div class="card big"><div class="t">井水體積</div><div class="v" id="wellVolume">—</div></div>
+      </div>
+      <div class="note">建議採樣深度：以井篩中點顯示。</div>
+      <div style="height:8px"></div>
+      <div class="purge">
+        <div class="purgeRow"><div class="name">第一次洗井（2 倍）</div><div class="val" id="purge2">—</div></div>
+        <div class="purgeRow"><div class="name">第二次洗井（0.5 倍）</div><div class="val" id="purge05a">—</div></div>
+        <div class="purgeRow"><div class="name">第三次洗井（0.5 倍）</div><div class="val" id="purge05b">—</div></div>
+        <div class="purgeRow total"><div class="name">總洗井體積（3 倍）</div><div class="val" id="purgeTotal">—</div></div>
+      </div>
+    </div>
   </section>
 </main>
-
 <script>
 const $=id=>document.getElementById(id);
+let dia=2;
 function n(v){return parseFloat(v)}
 function ok(x){return Number.isFinite(x)&&x>=0}
-function gt0(x){return Number.isFinite(x)&&x>0}
-function f1(x){return Number.isFinite(x)?(Math.round(x*10)/10).toFixed(1):"—"}
-function f2(x){return Number.isFinite(x)?(Math.round(x*100)/100).toFixed(2):"—"}
-function setVal(id,val,unit=""){$(id).innerHTML=val+` <span class="unit">${unit}</span>`}
-function diaCm(){
-  const p=$("diameterPreset").value;
-  if(p==="custom") return n($("diameterCm").value);
-  return n(p);
-}
+function pos(depth,total){if(!ok(depth)||!ok(total)||total<=0)return null;return Math.max(0,Math.min(100,depth/total*100))}
+function f1(x,u){return Number.isFinite(x)?(Math.round(x*10)/10).toFixed(1)+u:"—"}
+function setMarker(line,lbl,p,text){if(p===null){line.style.display='none';lbl.style.display='none';return}line.style.display='block';lbl.style.display='block';line.style.top=p+'%';lbl.style.top=p+'%';lbl.textContent=text}
 function calc(){
-  $("customDiaWrap").classList.toggle("hidden",$("diameterPreset").value!=="custom");
-  const d=diaCm();
-  const well=n($("wellDepth").value), wl=n($("waterLevel").value);
-  const st=n($("screenTop").value), sb=n($("screenBottom").value);
-  const waterCol=(ok(well)&&ok(wl))?well-wl:NaN;
-  const radiusM=(gt0(d)?d/100/2:NaN);
-  const volume=(gt0(radiusM)&&gt0(waterCol))?Math.PI*radiusM*radiusM*waterCol*1000:NaN;
-  const mid=(ok(st)&&ok(sb)&&sb>=st)?(st+sb)/2:NaN;
-  setVal("waterColumn",Number.isFinite(waterCol)?f2(waterCol):"—","m");
-  setVal("wellVolume",Number.isFinite(volume)?f1(volume):"—","L");
-  setVal("vol05",Number.isFinite(volume)?f1(volume*0.5):"—","L");
-  setVal("vol2",Number.isFinite(volume)?f1(volume*2):"—","L");
-  setVal("vol3",Number.isFinite(volume)?f1(volume*3):"—","L");
-  setVal("screenMid",Number.isFinite(mid)?f2(mid):"—","m");
-
-  let lines=[];
-  if($("wellId").value.trim()) lines.push(`<b>井號</b>：${$("wellId").value.trim()}`);
-  if(Number.isFinite(mid)) lines.push(`<b>建議採樣深度</b>：井篩中點 ${f2(mid)} m`);
-  if(ok(well)&&ok(wl)) lines.push(`<b>水柱高度</b>：${f2(waterCol)} m`);
-  if(Number.isFinite(volume)) lines.push(`<b>洗井體積</b>：0.5倍 ${f1(volume*0.5)} L｜2倍 ${f1(volume*2)} L｜3倍 ${f1(volume*3)} L`);
-  $("summary").innerHTML=lines.length?lines.join("<br>"):"輸入井深、水位與井篩位置後，自動計算。";
-
-  let note=[];
-  if(Number.isFinite(waterCol)&&waterCol<0) note.push("⚠️ 水位深度大於井深，請確認數值。");
-  if(ok(st)&&ok(sb)&&sb<st) note.push("⚠️ 井篩下緣小於上緣，請確認井篩資料。");
-  if(ok(wl)&&ok(st)&&wl>st) note.push("⚠️ 水位已低於井篩上緣，請確認有效水柱與採樣位置。");
-  $("note").textContent=note.join(" ");
+  const wd=n($('wellDepth').value), wl=n($('waterLevel').value), st=n($('screenTop').value), sb=n($('screenBottom').value);
+  let warn=[];
+  const validDepth=ok(wd)&&wd>0;
+  const waterColumn=(validDepth&&ok(wl))?wd-wl:NaN;
+  const screenLen=(ok(st)&&ok(sb))?sb-st:NaN;
+  const screenMid=(ok(st)&&ok(sb))?(st+sb)/2:NaN;
+  const factor=dia===2?2:8.1;
+  const vol=Number.isFinite(waterColumn)&&waterColumn>0?waterColumn*factor:NaN;
+  if(validDepth&&ok(wl)&&wl>wd)warn.push('水位深度大於井深，請確認數字。');
+  if(ok(st)&&ok(sb)&&sb<st)warn.push('井篩下緣小於上緣，請確認數字。');
+  if(validDepth&&ok(sb)&&sb>wd)warn.push('井篩下緣超過井深，請確認數字。');
+  if(Number.isFinite(waterColumn)&&waterColumn<0)warn.push('水柱高度為負值，請確認水位。');
+  $('warn').textContent=warn.join(' ');
+  $('waterColumn').textContent=f1(waterColumn,' m');
+  $('screenLen').textContent=f1(screenLen,' m');
+  $('screenMid').textContent=f1(screenMid,' m');
+  $('wellVolume').textContent=f1(vol,' L');
+  $('purge2').textContent=f1(vol*2,' L');
+  $('purge05a').textContent=f1(vol*0.5,' L');
+  $('purge05b').textContent=f1(vol*0.5,' L');
+  $('purgeTotal').textContent=f1(vol*3,' L');
+  $('bottomLbl').textContent=validDepth?'井底 '+f1(wd,' m'):'井底 —';
+  const wp=pos(wl,wd), sp=pos(st,wd), bp=pos(sb,wd), mp=pos(screenMid,wd);
+  setMarker($('waterMark'),$('waterLbl'),wp,ok(wl)?'水位 '+f1(wl,' m'):'水位 —');
+  setMarker($('screenTopMark'),$('screenTopLbl'),sp,ok(st)?'井篩上緣 '+f1(st,' m'):'井篩上緣 —');
+  setMarker($('screenBottomMark'),$('screenBottomLbl'),bp,ok(sb)?'井篩下緣 '+f1(sb,' m'):'井篩下緣 —');
+  setMarker($('sampleMark'),$('sampleLbl'),mp,Number.isFinite(screenMid)?'採樣深度 '+f1(screenMid,' m'):'採樣深度 —');
+  $('waterBox').style.height=(wp===null?0:(100-wp))+'%';
+  if(sp!==null&&bp!==null){$('screenBox').style.top=sp+'%';$('screenBox').style.height=Math.max(0,bp-sp)+'%';$('screenBox').style.display='block'}else{$('screenBox').style.display='none'}
+  if(mp!==null){$('sampleLine').style.top=mp+'%';$('sampleLine').style.display='block'}else{$('sampleLine').style.display='none'}
 }
-["wellId","diameterPreset","diameterCm","wellDepth","waterLevel","screenTop","screenBottom"].forEach(id=>$(id).addEventListener("input",calc));
-$("diameterPreset").addEventListener("change",calc);
-$("clearBtn").addEventListener("click",()=>{["wellId","diameterCm","wellDepth","waterLevel","screenTop","screenBottom"].forEach(id=>$(id).value="");$("diameterPreset").value="5.08";calc();});
+$('dia2').onclick=()=>{dia=2;$('dia2').classList.add('active');$('dia4').classList.remove('active');calc()};
+$('dia4').onclick=()=>{dia=4;$('dia4').classList.add('active');$('dia2').classList.remove('active');calc()};
+$('clearBtn').onclick=()=>{['wellDepth','waterLevel','screenTop','screenBottom'].forEach(id=>$(id).value='');calc()};
+['wellDepth','waterLevel','screenTop','screenBottom'].forEach(id=>$(id).addEventListener('input',calc));
 calc();
 </script>
 </body>
