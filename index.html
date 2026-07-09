@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>地下水採樣助手 V2.3</title>
+<title>地下水採樣助手 V2.4</title>
 <meta name="theme-color" content="#0f172a">
 <style>
 *{box-sizing:border-box}
@@ -107,8 +107,8 @@ input:focus{border-color:#38bdf8}
 <body>
 <main class="app">
   <div class="header">
-    <h1>地下水採樣助手 V2.3</h1>
-    <div class="badge">採樣點修正版</div>
+    <h1>地下水採樣助手 V2.4</h1>
+    <div class="badge">三位小數修正版</div>
   </div>
 
   <section class="panel">
@@ -123,19 +123,19 @@ input:focus{border-color:#38bdf8}
       </div>
       <div>
         <label for="wellDepth">井深 m</label>
-        <input id="wellDepth" type="number" inputmode="decimal" step="0.01" placeholder="30.00">
+        <input id="wellDepth" type="number" inputmode="decimal" step="0.001" placeholder="30.000">
       </div>
       <div>
         <label for="waterLevel">水位深度 m</label>
-        <input id="waterLevel" type="number" inputmode="decimal" step="0.01" placeholder="12.00">
+        <input id="waterLevel" type="number" inputmode="decimal" step="0.001" placeholder="12.000">
       </div>
       <div>
         <label for="screenTop">井篩上緣 m</label>
-        <input id="screenTop" type="number" inputmode="decimal" step="0.01" placeholder="18.00">
+        <input id="screenTop" type="number" inputmode="decimal" step="0.001" placeholder="18.000">
       </div>
       <div>
         <label for="screenBottom">井篩下緣 m</label>
-        <input id="screenBottom" type="number" inputmode="decimal" step="0.01" placeholder="28.00">
+        <input id="screenBottom" type="number" inputmode="decimal" step="0.001" placeholder="28.000">
       </div>
       <div class="clearWrap">
         <label>&nbsp;</label>
@@ -153,7 +153,7 @@ input:focus{border-color:#38bdf8}
           <div class="water" id="waterArea"></div>
           <div class="screen" id="screenArea"></div>
           <div class="sampleLine" id="sampleLine"></div>
-          <div class="marker topLbl">井口 0.00 m</div>
+          <div class="marker topLbl">井口 0.000 m</div>
           <div class="marker waterLbl" id="waterMark">水位 —</div>
           <div class="marker screenLbl" id="screenTopMark">井篩上緣 —</div>
           <div class="marker sampleLbl" id="sampleMark">採樣深度 —</div>
@@ -197,9 +197,9 @@ const rate = {2:2, 4:8.1};
 
 function n(id){ return parseFloat($(id).value); }
 function ok(x){ return Number.isFinite(x) && x >= 0; }
-function f2(x){ return Number.isFinite(x) ? (Math.round(x*100)/100).toFixed(2) : "—"; }
+function f3(x){ return Number.isFinite(x) ? (Math.round(x*1000)/1000).toFixed(3) : "—"; }
 function f4(x){ return Number.isFinite(x) ? (Math.round(x*10000)/10000).toFixed(4) : "—"; }
-function setVal(id,val,unit,fmt=f2){ $(id).innerHTML = (Number.isFinite(val)?fmt(val):"—") + ` <span class="u">${unit}</span>`; }
+function setVal(id,val,unit,fmt=f3){ $(id).innerHTML = (Number.isFinite(val)?fmt(val):"—") + ` <span class="u">${unit}</span>`; }
 function rawPct(depth,total){
   if(!Number.isFinite(depth)||!Number.isFinite(total)||total<=0) return null;
   return Math.max(4, Math.min(96, (depth/total)*100));
@@ -231,7 +231,7 @@ function calc(){
   const wc = (validDepth && ok(wl)) ? wd - wl : NaN;
   const sl = (ok(st) && ok(sb)) ? sb - st : NaN;
   const screenMid = (ok(st) && ok(sb)) ? (st + sb) / 2 : NaN;
-  const waterMid = (validDepth && ok(wl)) ? wl + (wd - wl) / 2 : NaN;
+  const waterMid = (validDepth && ok(wl) && ok(st)) ? st + (wd - wl) / 2 : NaN;
   const useWaterMid = ok(wl) && ok(st) && wl > st;
   const sm = useWaterMid ? waterMid : screenMid;
   const vol = (Number.isFinite(wc) && wc > 0) ? wc * rate[dia] : NaN;
@@ -254,11 +254,11 @@ function calc(){
 
   const wpRaw=rawPct(wl,wd), spRaw=rawPct(st,wd), bpRaw=rawPct(sb,wd), mpRaw=rawPct(sm,wd);
   const positions = spreadPositions([
-    {id:"waterMark", p:wpRaw, text:Number.isFinite(wl) ? "水位 "+f2(wl)+" m" : "水位 —"},
-    {id:"screenTopMark", p:spRaw, text:Number.isFinite(st) ? "井篩上緣 "+f2(st)+" m" : "井篩上緣 —"},
-    {id:"sampleMark", p:mpRaw, text:Number.isFinite(sm) ? "採樣深度 "+f2(sm)+" m" : "採樣深度 —"},
-    {id:"screenBottomMark", p:bpRaw, text:Number.isFinite(sb) ? "井篩下緣 "+f2(sb)+" m" : "井篩下緣 —"},
-    {id:"bottomMark", p:validDepth?96:null, text:validDepth ? "井底 "+f2(wd)+" m" : "井底 —"}
+    {id:"waterMark", p:wpRaw, text:Number.isFinite(wl) ? "水位 "+f3(wl)+" m" : "水位 —"},
+    {id:"screenTopMark", p:spRaw, text:Number.isFinite(st) ? "井篩上緣 "+f3(st)+" m" : "井篩上緣 —"},
+    {id:"sampleMark", p:mpRaw, text:Number.isFinite(sm) ? "採樣深度 "+f3(sm)+" m" : "採樣深度 —"},
+    {id:"screenBottomMark", p:bpRaw, text:Number.isFinite(sb) ? "井篩下緣 "+f3(sb)+" m" : "井篩下緣 —"},
+    {id:"bottomMark", p:validDepth?96:null, text:validDepth ? "井底 "+f3(wd)+" m" : "井底 —"}
   ], 8);
 
   ["waterMark","screenTopMark","sampleMark","screenBottomMark","bottomMark"].forEach(id=>setMarker(id,null,""));
@@ -283,9 +283,9 @@ function calc(){
 
   $("summary").innerHTML =
     `井徑：<b>${dia} 吋</b>｜計算倍率：<b>×${rate[dia]}</b><br>`+
-    `水柱高度：<b>${f2(wc)} m</b>｜井水體積：<b>${f4(vol)} L</b><br>`+
+    `水柱高度：<b>${f3(wc)} m</b>｜井水體積：<b>${f4(vol)} L</b><br>`+
     `第一次洗井 2 倍：<b>${f4(vol*2)} L</b>｜第二次 0.5 倍：<b>${f4(vol*.5)} L</b>｜第三次 0.5 倍：<b>${f4(vol*.5)} L</b><br>`+
-    `總洗井體積 3 倍：<b>${f4(vol*3)} L</b>｜建議採樣深度：<b>${f2(sm)} m</b><br>`+`採樣點規則：<b>${useWaterMid ? "水位以下水柱中點" : "井篩中點"}</b>`;
+    `總洗井體積 3 倍：<b>${f4(vol*3)} L</b>｜建議採樣深度：<b>${f3(sm)} m</b><br>`+`採樣點規則：<b>${useWaterMid ? "井篩上緣＋水位以下水柱一半" : "井篩中點"}</b>`;
 }
 $("dia2").onclick=()=>{ dia=2; $("dia2").classList.add("active"); $("dia4").classList.remove("active"); calc(); };
 $("dia4").onclick=()=>{ dia=4; $("dia4").classList.add("active"); $("dia2").classList.remove("active"); calc(); };
