@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>地下水採樣助手 V1</title>
+<meta name="theme-color" content="#0f172a">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",Arial,sans-serif;
+  background:#0f172a;color:#f8fafc;min-height:100vh;padding:10px;
+}
+.app{max-width:980px;margin:0 auto}
+.header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:4px 0 10px}
+h1{font-size:24px;margin:0;font-weight:950}
+.badge{background:#022c22;color:#86efac;border:1px solid #166534;border-radius:999px;padding:6px 12px;font-size:14px;font-weight:900}
+.panel{background:#111827;border:1px solid #334155;border-radius:18px;padding:12px;margin-bottom:10px;box-shadow:0 8px 18px rgba(0,0,0,.2)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+label{display:block;font-size:15px;font-weight:900;color:#cbd5e1;margin-bottom:5px}
+input,select{
+  width:100%;font-size:26px;padding:9px 10px;border-radius:13px;
+  border:2px solid #475569;background:#020617;color:#fff;outline:none;
+}
+input:focus,select:focus{border-color:#38bdf8}
+button{height:48px;border:0;border-radius:13px;background:#334155;color:#fff;font-size:18px;font-weight:950;width:100%}
+.title{font-size:19px;font-weight:950;color:#7dd3fc;margin:0 0 10px}
+.resultGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.card{background:#0b1220;border:1px solid #334155;border-radius:16px;padding:12px;min-height:98px}
+.card .k{font-size:14px;color:#cbd5e1;font-weight:900;margin-bottom:8px}
+.card .v{font-size:30px;font-weight:950;color:#f8fafc}
+.card .unit{font-size:18px;color:#94a3b8;margin-left:4px}
+.good{color:#86efac!important}.warn{color:#fde68a!important}.bad{color:#fecaca!important}
+.summary{font-size:17px;line-height:1.65;color:#e2e8f0}
+.summary b{color:#7dd3fc}
+.note{font-size:14px;color:#cbd5e1;line-height:1.5;margin-top:6px}
+.hidden{display:none!important}
+@media(max-width:760px){
+  body{padding:8px;padding-top:18px}
+  h1{font-size:22px}
+  .badge{font-size:12px;padding:5px 9px}
+  .panel{padding:10px;margin-bottom:9px}
+  .grid{grid-template-columns:1fr 1fr;gap:8px}
+  .full{grid-column:1/3}
+  input,select{font-size:24px;padding:8px 9px}
+  .resultGrid{grid-template-columns:1fr 1fr;gap:8px}
+  .card{padding:10px;min-height:88px}
+  .card .v{font-size:25px}
+  .summary{font-size:15px}
+}
+@media(max-width:420px){
+  .grid{gap:7px}
+  input,select{font-size:22px}
+  .resultGrid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<main class="app">
+  <div class="header">
+    <h1>地下水採樣助手 V1</h1>
+    <div class="badge">試用版</div>
+  </div>
+
+  <section class="panel">
+    <div class="title">基本資料</div>
+    <div class="grid">
+      <div>
+        <label for="wellId">井號</label>
+        <input id="wellId" type="text" placeholder="MW-01">
+      </div>
+      <div>
+        <label for="diameterPreset">井徑</label>
+        <select id="diameterPreset">
+          <option value="5.08">2 吋（5.08 cm）</option>
+          <option value="10.16">4 吋（10.16 cm）</option>
+          <option value="15.24">6 吋（15.24 cm）</option>
+          <option value="20.32">8 吋（20.32 cm）</option>
+          <option value="custom">自訂 cm</option>
+        </select>
+      </div>
+      <div id="customDiaWrap" class="hidden">
+        <label for="diameterCm">自訂井徑 cm</label>
+        <input id="diameterCm" type="number" inputmode="decimal" min="0" step="0.1" placeholder="5.08">
+      </div>
+      <div>
+        <label for="wellDepth">井深 m</label>
+        <input id="wellDepth" type="number" inputmode="decimal" min="0" step="0.01" placeholder="30.0">
+      </div>
+      <div>
+        <label for="waterLevel">水位深度 m</label>
+        <input id="waterLevel" type="number" inputmode="decimal" min="0" step="0.01" placeholder="12.0">
+      </div>
+      <div>
+        <label for="screenTop">井篩上緣 m</label>
+        <input id="screenTop" type="number" inputmode="decimal" min="0" step="0.01" placeholder="18.0">
+      </div>
+      <div>
+        <label for="screenBottom">井篩下緣 m</label>
+        <input id="screenBottom" type="number" inputmode="decimal" min="0" step="0.01" placeholder="28.0">
+      </div>
+      <div class="full">
+        <button id="clearBtn" type="button">清除</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="title">自動計算</div>
+    <div class="resultGrid">
+      <div class="card"><div class="k">水柱高度</div><div class="v" id="waterColumn">— <span class="unit">m</span></div></div>
+      <div class="card"><div class="k">井水體積</div><div class="v" id="wellVolume">— <span class="unit">L</span></div></div>
+      <div class="card"><div class="k">0.5 倍洗井體積</div><div class="v" id="vol05">— <span class="unit">L</span></div></div>
+      <div class="card"><div class="k">2 倍洗井體積</div><div class="v" id="vol2">— <span class="unit">L</span></div></div>
+      <div class="card"><div class="k">3 倍洗井體積</div><div class="v" id="vol3">— <span class="unit">L</span></div></div>
+      <div class="card"><div class="k">井篩中點</div><div class="v" id="screenMid">— <span class="unit">m</span></div></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="title">採樣深度建議</div>
+    <div class="summary" id="summary">輸入井深、水位與井篩位置後，自動計算。</div>
+    <div class="note" id="note"></div>
+  </section>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+function n(v){return parseFloat(v)}
+function ok(x){return Number.isFinite(x)&&x>=0}
+function gt0(x){return Number.isFinite(x)&&x>0}
+function f1(x){return Number.isFinite(x)?(Math.round(x*10)/10).toFixed(1):"—"}
+function f2(x){return Number.isFinite(x)?(Math.round(x*100)/100).toFixed(2):"—"}
+function setVal(id,val,unit=""){$(id).innerHTML=val+` <span class="unit">${unit}</span>`}
+function diaCm(){
+  const p=$("diameterPreset").value;
+  if(p==="custom") return n($("diameterCm").value);
+  return n(p);
+}
+function calc(){
+  $("customDiaWrap").classList.toggle("hidden",$("diameterPreset").value!=="custom");
+  const d=diaCm();
+  const well=n($("wellDepth").value), wl=n($("waterLevel").value);
+  const st=n($("screenTop").value), sb=n($("screenBottom").value);
+  const waterCol=(ok(well)&&ok(wl))?well-wl:NaN;
+  const radiusM=(gt0(d)?d/100/2:NaN);
+  const volume=(gt0(radiusM)&&gt0(waterCol))?Math.PI*radiusM*radiusM*waterCol*1000:NaN;
+  const mid=(ok(st)&&ok(sb)&&sb>=st)?(st+sb)/2:NaN;
+  setVal("waterColumn",Number.isFinite(waterCol)?f2(waterCol):"—","m");
+  setVal("wellVolume",Number.isFinite(volume)?f1(volume):"—","L");
+  setVal("vol05",Number.isFinite(volume)?f1(volume*0.5):"—","L");
+  setVal("vol2",Number.isFinite(volume)?f1(volume*2):"—","L");
+  setVal("vol3",Number.isFinite(volume)?f1(volume*3):"—","L");
+  setVal("screenMid",Number.isFinite(mid)?f2(mid):"—","m");
+
+  let lines=[];
+  if($("wellId").value.trim()) lines.push(`<b>井號</b>：${$("wellId").value.trim()}`);
+  if(Number.isFinite(mid)) lines.push(`<b>建議採樣深度</b>：井篩中點 ${f2(mid)} m`);
+  if(ok(well)&&ok(wl)) lines.push(`<b>水柱高度</b>：${f2(waterCol)} m`);
+  if(Number.isFinite(volume)) lines.push(`<b>洗井體積</b>：0.5倍 ${f1(volume*0.5)} L｜2倍 ${f1(volume*2)} L｜3倍 ${f1(volume*3)} L`);
+  $("summary").innerHTML=lines.length?lines.join("<br>"):"輸入井深、水位與井篩位置後，自動計算。";
+
+  let note=[];
+  if(Number.isFinite(waterCol)&&waterCol<0) note.push("⚠️ 水位深度大於井深，請確認數值。");
+  if(ok(st)&&ok(sb)&&sb<st) note.push("⚠️ 井篩下緣小於上緣，請確認井篩資料。");
+  if(ok(wl)&&ok(st)&&wl>st) note.push("⚠️ 水位已低於井篩上緣，請確認有效水柱與採樣位置。");
+  $("note").textContent=note.join(" ");
+}
+["wellId","diameterPreset","diameterCm","wellDepth","waterLevel","screenTop","screenBottom"].forEach(id=>$(id).addEventListener("input",calc));
+$("diameterPreset").addEventListener("change",calc);
+$("clearBtn").addEventListener("click",()=>{["wellId","diameterCm","wellDepth","waterLevel","screenTop","screenBottom"].forEach(id=>$(id).value="");$("diameterPreset").value="5.08";calc();});
+calc();
+</script>
+</body>
+</html>
