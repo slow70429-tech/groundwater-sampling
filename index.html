@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>地下水採樣助手 V2.1</title>
+<title>地下水採樣助手 V2.3</title>
 <meta name="theme-color" content="#0f172a">
 <style>
 *{box-sizing:border-box}
@@ -64,11 +64,11 @@ input:focus{border-color:#38bdf8}
   border-top:5px solid #86efac;display:none;z-index:5;
 }
 .marker{
-  position:absolute;left:calc(34% + 74px);right:8px;transform:translateY(-50%);
+  position:absolute;left:calc(34% + 74px);right:8px;transform:translateY(-22%);
   display:none;align-items:center;gap:8px;font-size:17px;font-weight:950;color:#e2e8f0;line-height:1.15;
-  min-height:28px;
+  min-height:34px;padding:4px 6px;border-radius:8px;background:rgba(2,6,23,.82);z-index:10;
 }
-.marker:before{content:"";width:36px;height:3px;background:#94a3b8;flex:0 0 auto}
+.marker:before{content:"";width:36px;height:3px;background:#94a3b8;flex:0 0 auto;align-self:center}
 .marker.topLbl{display:flex;top:24px}
 .marker.waterLbl{color:#7dd3fc}
 .marker.screenLbl{color:#fdba74}
@@ -107,8 +107,8 @@ input:focus{border-color:#38bdf8}
 <body>
 <main class="app">
   <div class="header">
-    <h1>地下水採樣助手 V2.1</h1>
-    <div class="badge">圖左版</div>
+    <h1>地下水採樣助手 V2.3</h1>
+    <div class="badge">採樣點修正版</div>
   </div>
 
   <section class="panel">
@@ -198,7 +198,8 @@ const rate = {2:2, 4:8.1};
 function n(id){ return parseFloat($(id).value); }
 function ok(x){ return Number.isFinite(x) && x >= 0; }
 function f2(x){ return Number.isFinite(x) ? (Math.round(x*100)/100).toFixed(2) : "—"; }
-function setVal(id,val,unit){ $(id).innerHTML = (Number.isFinite(val)?f2(val):"—") + ` <span class="u">${unit}</span>`; }
+function f4(x){ return Number.isFinite(x) ? (Math.round(x*10000)/10000).toFixed(4) : "—"; }
+function setVal(id,val,unit,fmt=f2){ $(id).innerHTML = (Number.isFinite(val)?fmt(val):"—") + ` <span class="u">${unit}</span>`; }
 function rawPct(depth,total){
   if(!Number.isFinite(depth)||!Number.isFinite(total)||total<=0) return null;
   return Math.max(4, Math.min(96, (depth/total)*100));
@@ -229,18 +230,21 @@ function calc(){
   const validDepth = ok(wd) && wd > 0;
   const wc = (validDepth && ok(wl)) ? wd - wl : NaN;
   const sl = (ok(st) && ok(sb)) ? sb - st : NaN;
-  const sm = (ok(st) && ok(sb)) ? (st + sb) / 2 : NaN;
+  const screenMid = (ok(st) && ok(sb)) ? (st + sb) / 2 : NaN;
+  const waterMid = (validDepth && ok(wl)) ? wl + (wd - wl) / 2 : NaN;
+  const useWaterMid = ok(wl) && ok(st) && wl > st;
+  const sm = useWaterMid ? waterMid : screenMid;
   const vol = (Number.isFinite(wc) && wc > 0) ? wc * rate[dia] : NaN;
 
   setVal("waterColumn",wc,"m");
-  setVal("wellVolume",vol,"L");
+  setVal("wellVolume",vol,"L",f4);
   setVal("screenLen",sl,"m");
   setVal("screenMid",sm,"m");
-  setVal("pv1",vol,"L");
-  setVal("pv2",vol*2,"L");
-  setVal("pv05a",vol*0.5,"L");
-  setVal("pv05b",vol*0.5,"L");
-  setVal("pv3",vol*3,"L");
+  setVal("pv1",vol,"L",f4);
+  setVal("pv2",vol*2,"L",f4);
+  setVal("pv05a",vol*0.5,"L",f4);
+  setVal("pv05b",vol*0.5,"L",f4);
+  setVal("pv3",vol*3,"L",f4);
 
   let warns=[];
   if(Number.isFinite(wc)&&wc<0) warns.push("水位深度大於井深，請確認資料。");
@@ -279,9 +283,9 @@ function calc(){
 
   $("summary").innerHTML =
     `井徑：<b>${dia} 吋</b>｜計算倍率：<b>×${rate[dia]}</b><br>`+
-    `水柱高度：<b>${f2(wc)} m</b>｜井水體積：<b>${f2(vol)} L</b><br>`+
-    `第一次洗井 2 倍：<b>${f2(vol*2)} L</b>｜第二次 0.5 倍：<b>${f2(vol*.5)} L</b>｜第三次 0.5 倍：<b>${f2(vol*.5)} L</b><br>`+
-    `總洗井體積 3 倍：<b>${f2(vol*3)} L</b>｜建議採樣深度：<b>${f2(sm)} m</b>`;
+    `水柱高度：<b>${f2(wc)} m</b>｜井水體積：<b>${f4(vol)} L</b><br>`+
+    `第一次洗井 2 倍：<b>${f4(vol*2)} L</b>｜第二次 0.5 倍：<b>${f4(vol*.5)} L</b>｜第三次 0.5 倍：<b>${f4(vol*.5)} L</b><br>`+
+    `總洗井體積 3 倍：<b>${f4(vol*3)} L</b>｜建議採樣深度：<b>${f2(sm)} m</b><br>`+`採樣點規則：<b>${useWaterMid ? "水位以下水柱中點" : "井篩中點"}</b>`;
 }
 $("dia2").onclick=()=>{ dia=2; $("dia2").classList.add("active"); $("dia4").classList.remove("active"); calc(); };
 $("dia4").onclick=()=>{ dia=4; $("dia4").classList.add("active"); $("dia2").classList.remove("active"); calc(); };
