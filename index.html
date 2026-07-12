@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>地下水採樣助手 V2.6</title>
+<title>地下水採樣助手 V2.7</title>
 <meta name="theme-color" content="#0f172a">
 <style>
 *{box-sizing:border-box}
@@ -160,7 +160,7 @@ input:focus{border-color:#38bdf8}
 <body>
 <main class="app">
   <div class="header">
-    <h1>地下水採樣助手 V2.6</h1>
+    <h1>地下水採樣助手 V2.7</h1>
     <div class="badge">手機一頁式</div>
   </div>
 
@@ -179,8 +179,12 @@ input:focus{border-color:#38bdf8}
         <input id="wellDepth" type="number" inputmode="decimal" step="0.001" placeholder="30.000">
       </div>
       <div>
-        <label for="waterLevel">水位深度 m</label>
+        <label for="waterLevel">洗井前水位深度 m</label>
         <input id="waterLevel" type="number" inputmode="decimal" step="0.001" placeholder="12.000">
+      </div>
+      <div>
+        <label for="postWaterLevel">洗井後水位深度 m</label>
+        <input id="postWaterLevel" type="number" inputmode="decimal" step="0.001" placeholder="例如 10.505">
       </div>
       <div>
         <label for="screenTop">井篩上緣 m</label>
@@ -222,7 +226,10 @@ input:focus{border-color:#38bdf8}
         <div class="card"><div class="k">水柱高度</div><div class="v" id="waterColumn">— <span class="u">m</span></div></div>
         <div class="card"><div class="k">井水體積</div><div class="v" id="wellVolume">— <span class="u">L</span></div></div>
         <div class="card"><div class="k">井篩長度</div><div class="v" id="screenLen">— <span class="u">m</span></div></div>
-        <div class="card"><div class="k">井篩中點 / 建議採樣深度</div><div class="v" id="screenMid">— <span class="u">m</span></div></div>
+        <div class="card"><div class="k">最大允許洩降（井篩長度 1/8）</div><div class="v" id="maxDrawdown">— <span class="u">m</span></div></div>
+        <div class="card"><div class="k">實際洩降深度</div><div class="v" id="drawdownDepth">— <span class="u">m</span></div></div>
+        <div class="card"><div class="k">洩降體積</div><div class="v" id="drawdownVolume">— <span class="u">L</span></div></div>
+        <div class="card"><div class="k">建議採樣深度</div><div class="v" id="screenMid">— <span class="u">m</span></div></div>
       </div>
 
       <h2 style="margin-top:14px">貝勒管洗井體積</h2>
@@ -283,71 +290,99 @@ function setMarker(id,top,text){
   else{ el.style.display="flex"; el.style.top=top+"%"; }
 }
 function calc(){
-  const wd=n("wellDepth"), wl=n("waterLevel"), st=n("screenTop"), sb=n("screenBottom");
-  const validDepth = ok(wd) && wd > 0;
-  const wc = (validDepth && ok(wl)) ? wd - wl : NaN;
-  const sl = (ok(st) && ok(sb)) ? sb - st : NaN;
-  const screenMid = (ok(st) && ok(sb)) ? (st + sb) / 2 : NaN;
-  const waterMid = (validDepth && ok(wl) && ok(st)) ? st + (wd - wl) / 2 : NaN;
-  const useWaterMid = ok(wl) && ok(st) && wl > st;
-  const sm = useWaterMid ? waterMid : screenMid;
-  const vol = (Number.isFinite(wc) && wc > 0) ? wc * rate[dia] : NaN;
+  const wd=n("wellDepth"), wl=n("waterLevel"), pwl=n("postWaterLevel"), st=n("screenTop"), sb=n("screenBottom");
+  const validDepth=ok(wd)&&wd>0;
+  const currentWater=ok(pwl)?pwl:wl;
+  const wc=(validDepth&&ok(wl))?wd-wl:NaN;
+  const sl=(ok(st)&&ok(sb))?sb-st:NaN;
+  const screenMid=(ok(st)&&ok(sb))?(st+sb)/2:NaN;
+
+  let sm=NaN, sampleRule="—";
+  if(validDepth&&ok(st)&&ok(sb)){
+    if(ok(pwl)){
+      if(pwl<=st){
+        sm=screenMid;
+        sampleRule="洗井後水位未低於井篩上緣，採井篩中點";
+      }else{
+        sm=pwl+(wd-pwl)/2;
+        sampleRule="洗井後水位已進入井篩，採洗井後水位與井底中點";
+      }
+    }else if(ok(wl)){
+      sm=wl<=st?screenMid:wl+(wd-wl)/2;
+      sampleRule=wl<=st?"尚未輸入洗井後水位，暫採井篩中點":"尚未輸入洗井後水位，暫採原水位與井底中點";
+    }
+  }
+
+  const vol=(Number.isFinite(wc)&&wc>0)?wc*rate[dia]:NaN;
+  const drawdown=(ok(wl)&&ok(pwl))?pwl-wl:NaN;
+  const drawVol=Number.isFinite(drawdown)?Math.max(0,drawdown)*rate[dia]:NaN;
+  const maxDraw=(Number.isFinite(sl)&&sl>=0)?sl/8:NaN;
+  const drawOk=Number.isFinite(drawdown)&&Number.isFinite(maxDraw)?drawdown<=maxDraw:null;
 
   setVal("waterColumn",wc,"m");
   setVal("wellVolume",vol,"L",fVol);
   setVal("screenLen",sl,"m");
+  setVal("maxDrawdown",maxDraw,"m");
+  setVal("drawdownDepth",drawdown,"m");
+  setVal("drawdownVolume",drawVol,"L",fVol);
   setVal("screenMid",sm,"m");
   setVal("pv1",vol,"L",fVol);
   setVal("pv2",vol*2,"L",fL);
-  setVal("pv05a",vol*0.5,"L",fL);
-  setVal("pv05b",vol*0.5,"L",fL);
+  setVal("pv05a",vol*.5,"L",fL);
+  setVal("pv05b",vol*.5,"L",fL);
   setVal("pv3",vol*3,"L",fL);
 
   let warns=[];
-  if(Number.isFinite(wc)&&wc<0) warns.push("水位深度大於井深，請確認資料。");
+  if(Number.isFinite(wc)&&wc<0) warns.push("洗井前水位深度大於井深，請確認資料。");
   if(Number.isFinite(sl)&&sl<0) warns.push("井篩下緣小於井篩上緣，請確認資料。");
-  if(Number.isFinite(sm)&&validDepth&&sm>wd) warns.push("井篩中點超過井底，請確認井篩位置。");
+  if(ok(pwl)&&validDepth&&pwl>wd) warns.push("洗井後水位深度大於井深，請確認資料。");
+  if(Number.isFinite(drawdown)&&drawdown<0) warns.push("洗井後水位比洗井前更淺，請確認輸入。");
+  if(drawOk===false) warns.push("實際洩降超過井篩總長的 1/8，不符合限制。");
   $("warn").textContent=warns.join(" ");
 
-  const wpRaw=rawPct(wl,wd), spRaw=rawPct(st,wd), bpRaw=rawPct(sb,wd), mpRaw=rawPct(sm,wd);
-  const positions = spreadPositions([
-    {id:"waterMark", p:wpRaw, text:Number.isFinite(wl) ? "水位 "+f3(wl)+" m" : "水位 —"},
-    {id:"screenTopMark", p:spRaw, text:Number.isFinite(st) ? "井篩上緣 "+f3(st)+" m" : "井篩上緣 —"},
-    {id:"sampleMark", p:mpRaw, text:Number.isFinite(sm) ? "採樣深度 "+f3(sm)+" m" : "採樣深度 —"},
-    {id:"screenBottomMark", p:bpRaw, text:Number.isFinite(sb) ? "井篩下緣 "+f3(sb)+" m" : "井篩下緣 —"},
-    {id:"bottomMark", p:validDepth?96:null, text:validDepth ? "井底 "+f3(wd)+" m" : "井底 —"}
-  ], 8);
+  const wpRaw=rawPct(currentWater,wd),spRaw=rawPct(st,wd),bpRaw=rawPct(sb,wd),mpRaw=rawPct(sm,wd);
+  const positions=spreadPositions([
+    {id:"waterMark",p:wpRaw,text:Number.isFinite(currentWater)?(ok(pwl)?"洗井後水位 ":"水位 ")+f3(currentWater)+" m":"水位 —"},
+    {id:"screenTopMark",p:spRaw,text:Number.isFinite(st)?"井篩上緣 "+f3(st)+" m":"井篩上緣 —"},
+    {id:"sampleMark",p:mpRaw,text:Number.isFinite(sm)?"採樣深度 "+f3(sm)+" m":"採樣深度 —"},
+    {id:"screenBottomMark",p:bpRaw,text:Number.isFinite(sb)?"井篩下緣 "+f3(sb)+" m":"井篩下緣 —"},
+    {id:"bottomMark",p:validDepth?96:null,text:validDepth?"井底 "+f3(wd)+" m":"井底 —"}
+  ],8);
 
   ["waterMark","screenTopMark","sampleMark","screenBottomMark","bottomMark"].forEach(id=>setMarker(id,null,""));
   positions.forEach(x=>setMarker(x.id,x.p,x.text));
 
-  if(validDepth && Number.isFinite(wpRaw)){
+  if(validDepth&&Number.isFinite(wpRaw)){
     $("waterArea").style.display="block";
     $("waterArea").style.top=wpRaw+"%";
     $("waterArea").style.height=(96-wpRaw)+"%";
-  } else { $("waterArea").style.display="none"; }
+  }else $("waterArea").style.display="none";
 
-  if(validDepth && Number.isFinite(spRaw) && Number.isFinite(bpRaw)){
+  if(validDepth&&Number.isFinite(spRaw)&&Number.isFinite(bpRaw)){
     $("screenArea").style.display="block";
     $("screenArea").style.top=Math.min(spRaw,bpRaw)+"%";
     $("screenArea").style.height=Math.max(4,Math.abs(bpRaw-spRaw))+"%";
-  } else { $("screenArea").style.display="none"; }
+  }else $("screenArea").style.display="none";
 
   if(Number.isFinite(mpRaw)){
     $("sampleLine").style.display="block";
     $("sampleLine").style.top=mpRaw+"%";
-  } else { $("sampleLine").style.display="none"; }
+  }else $("sampleLine").style.display="none";
 
-  $("summary").innerHTML =
+  $("summary").innerHTML=
     `井徑：<b>${dia} 吋</b>｜計算倍率：<b>×${rate[dia]}</b><br>`+
+    `洗井前水位：<b>${f3(wl)} m</b>｜洗井後水位：<b>${f3(pwl)} m</b><br>`+
+    `洩降深度：<b>${f3(drawdown)} m</b>｜洩降體積：<b>${fVol(drawVol)} L</b><br>`+
+    `井篩長度：<b>${f3(sl)} m</b>｜最大允許洩降：<b>${f3(maxDraw)} m</b><br>`+
     `水柱高度：<b>${f3(wc)} m</b>｜井水體積：<b>${fVol(vol)} L</b><br>`+
     `第一次洗井 2 倍：<b>${fL(vol*2)} L</b>｜第二次 0.5 倍：<b>${fL(vol*.5)} L</b>｜第三次 0.5 倍：<b>${fL(vol*.5)} L</b><br>`+
-    `總洗井體積 3 倍：<b>${fL(vol*3)} L</b>｜建議採樣深度：<b>${f3(sm)} m</b><br>`+`採樣點規則：<b>${useWaterMid ? "井篩上緣＋水位以下水柱一半" : "井篩中點"}</b>`;
+    `總洗井體積 3 倍：<b>${fL(vol*3)} L</b>｜建議採樣深度：<b>${f3(sm)} m</b><br>`+
+    `採樣點規則：<b>${sampleRule}</b>`;
 }
 $("dia2").onclick=()=>{ dia=2; $("dia2").classList.add("active"); $("dia4").classList.remove("active"); calc(); };
 $("dia4").onclick=()=>{ dia=4; $("dia4").classList.add("active"); $("dia2").classList.remove("active"); calc(); };
-["wellDepth","waterLevel","screenTop","screenBottom"].forEach(id=>$(id).addEventListener("input",calc));
-$("clearBtn").onclick=()=>{ ["wellDepth","waterLevel","screenTop","screenBottom"].forEach(id=>$(id).value=""); calc(); };
+["wellDepth","waterLevel","postWaterLevel","screenTop","screenBottom"].forEach(id=>$(id).addEventListener("input",calc));
+$("clearBtn").onclick=()=>{ ["wellDepth","waterLevel","postWaterLevel","screenTop","screenBottom"].forEach(id=>$(id).value=""); calc(); };
 calc();
 </script>
 </body>
