@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>地下水採樣助手 V3.0</title>
+<title>地下水採樣助手 V3.0.1</title>
 <meta name="theme-color" content="#0f172a">
 <style>
 *{box-sizing:border-box}html,body{margin:0;padding:0}
@@ -26,7 +26,7 @@ label{display:block;font-size:15px;font-weight:900;color:#cbd5e1;margin-bottom:5
 </head>
 <body>
 <main class="app">
-<div class="header"><h1>地下水採樣助手 V3.0</h1><div class="badge">手機一頁式</div></div>
+<div class="header"><h1>地下水採樣助手 V3.0.1</h1><div class="badge">手機一頁式・修正版 3.0.1</div></div>
 <section class="panel"><h2>基本資料</h2><div class="inputGrid">
 <div><label>井徑</label><div class="diaRow"><button class="diaBtn active" id="dia2" type="button">2 吋</button><button class="diaBtn" id="dia4" type="button">4 吋</button></div></div>
 <div><label for="waterLevel">洗井前水位深度 m</label><input id="waterLevel" type="number" inputmode="decimal" step="0.001" placeholder="12.000"></div>
@@ -53,8 +53,21 @@ function n(id){return parseFloat($(id).value)}function ok(x){return Number.isFin
 function spreadPositions(list,minGap=7){const valid=list.filter(x=>x.p!==null).sort((a,b)=>a.p-b.p);for(let i=1;i<valid.length;i++)if(valid[i].p-valid[i-1].p<minGap)valid[i].p=valid[i-1].p+minGap;for(let i=valid.length-2;i>=0;i--){if(valid[i+1].p>96){const s=valid[i+1].p-96;for(let j=0;j<=i+1;j++)valid[j].p-=s}if(valid[i+1].p-valid[i].p<minGap)valid[i].p=valid[i+1].p-minGap}valid.forEach(x=>x.p=Math.max(4,Math.min(96,x.p)));return valid}
 function setMarker(id,top,text){const el=$(id);el.textContent=text;if(top===null)el.style.display="none";else{el.style.display="flex";el.style.top=top+"%"}}
 function setLine(id,p){const el=$(id);if(Number.isFinite(p)){el.style.display="block";el.style.top=p+"%"}else el.style.display="none"}
-function calc(){const wd=n("wellDepth"),wl=n("waterLevel"),pwl=n("postWaterLevel"),st=n("screenTop"),sb=n("screenBottom");const validDepth=ok(wd)&&wd>0;const currentWater=ok(pwl)?pwl:wl;const wc=(validDepth&&ok(wl))?wd-wl:NaN;const sl=(ok(st)&&ok(sb))?sb-st:NaN;const mid=(ok(st)&&ok(sb))?(st+sb)/2:NaN;let sm=NaN,sampleRule="—";
-if(validDepth&&ok(st)&&ok(sb)){if(ok(pwl)){if(pwl<=st){sm=mid;sampleRule="洗井後水位未進入井篩，採井篩中點"}else if(pwl<sb){sm=(pwl+sb)/2;sampleRule="洗井後水位進入井篩，採篩內水位區間中點"}else{sm=pwl+(wd-pwl)/2;sampleRule="洗井後水位低於井篩下緣，暫採洗井後水位與井底中點"}}else if(ok(wl)){if(wl<=st){sm=mid;sampleRule="尚未輸入洗井後水位，暫採井篩中點"}else if(wl<sb){sm=(wl+sb)/2;sampleRule="尚未輸入洗井後水位，暫採篩內水位區間中點"}else{sm=wl+(wd-wl)/2;sampleRule="原水位低於井篩下緣，暫採原水位與井底中點"}}}
+function getSamplingDepth(wd,wl,pwl,st,sb){
+  if(!(ok(wd)&&wd>0&&ok(st)&&ok(sb)&&sb>=st))return{depth:NaN,rule:"—"};
+  const level=ok(pwl)?pwl:wl;
+  const prefix=ok(pwl)?"洗井後水位":"尚未輸入洗井後水位，暫以洗井前水位";
+  if(!ok(level))return{depth:NaN,rule:"—"};
+  if(level<=st){
+    return{depth:(st+sb)/2,rule:prefix+"未進入井篩，採井篩中點"};
+  }
+  if(level<sb){
+    // NIEA：水位進入井篩時，採「水位至井篩下緣」之中點。
+    return{depth:(level+sb)/2,rule:prefix+"進入井篩，採篩內水柱中點：("+f3(level)+" + "+f3(sb)+") ÷ 2"};
+  }
+  return{depth:level+(wd-level)/2,rule:prefix+"低於井篩下緣，暫採水位與井底中點"};
+}
+function calc(){const wd=n("wellDepth"),wl=n("waterLevel"),pwl=n("postWaterLevel"),st=n("screenTop"),sb=n("screenBottom");const validDepth=ok(wd)&&wd>0;const currentWater=ok(pwl)?pwl:wl;const wc=(validDepth&&ok(wl))?wd-wl:NaN;const sl=(ok(st)&&ok(sb))?sb-st:NaN;const sampling=getSamplingDepth(wd,wl,pwl,st,sb);const sm=sampling.depth,sampleRule=sampling.rule;
 const vol=(Number.isFinite(wc)&&wc>0)?wc*rate[dia]:NaN,drawdown=(ok(wl)&&ok(pwl))?pwl-wl:NaN,drawVol=Number.isFinite(drawdown)?Math.max(0,drawdown)*rate[dia]:NaN,maxDraw=(Number.isFinite(sl)&&sl>=0)?sl/8:NaN,drawOk=Number.isFinite(drawdown)&&Number.isFinite(maxDraw)?drawdown<=maxDraw:null;
 setVal("waterColumn",wc,"m");setVal("wellVolume",vol,"L",fVol);setVal("screenLen",sl,"m");setVal("maxDrawdown",maxDraw,"m");setVal("drawdownDepth",drawdown,"m");setVal("drawdownVolume",drawVol,"L",fVol);setVal("screenMid",sm,"m");setVal("pv1",vol,"L",fVol);setVal("pv2",vol*2,"L",fCeil);setVal("pv05a",vol*.5,"L",fCeil);setVal("pv05b",vol*.5,"L",fCeil);setVal("pv3",vol*3,"L",fCeil);
 let warns=[];if(Number.isFinite(wc)&&wc<0)warns.push("洗井前水位深度大於井深，請確認資料。");if(Number.isFinite(sl)&&sl<0)warns.push("井篩下緣小於井篩上緣，請確認資料。");if(ok(pwl)&&validDepth&&pwl>wd)warns.push("洗井後水位深度大於井深，請確認資料。");if(Number.isFinite(drawdown)&&drawdown<0)warns.push("洗井後水位比洗井前更淺，請確認輸入。");if(drawOk===false)warns.push("⚠ 實際洩降超過井篩總長的 1/8，建議採樣深度以紅色警示。");if(ok(pwl)&&ok(sb)&&pwl>=sb)warns.push("洗井後水位已低於井篩下緣，井篩內無有效水柱，請確認現場狀況。");$("warn").textContent=warns.join(" ");$("sampleLine").classList.toggle("over",drawOk===false);$("sampleMark").classList.toggle("over",drawOk===false);$("sampleCard").classList.toggle("alertCard",drawOk===false);
